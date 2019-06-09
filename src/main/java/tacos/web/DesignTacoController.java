@@ -22,16 +22,22 @@ import tacos.Ingredient.Type;
 import tacos.Order;
 import tacos.Taco;
 import tacos.data.IngredientRepository;
+import tacos.data.TacoRepository;
 
 @Controller
 @RequestMapping("/design")
 @SessionAttributes("order")
 public class DesignTacoController {
+
 	private final IngredientRepository ingredientRepo;
 
+	private TacoRepository designRepo;
+
 	@Autowired
-	public DesignTacoController(IngredientRepository ingredientRepo) {
+	public DesignTacoController(IngredientRepository ingredientRepo,
+			TacoRepository designRepo) {
 		this.ingredientRepo = ingredientRepo;
+		this.designRepo = designRepo;
 	}
 
 	@ModelAttribute(name = "order")
@@ -57,16 +63,13 @@ public class DesignTacoController {
 	}
 
 	@PostMapping
-	public String processDesign(@Valid @ModelAttribute("design") Taco design,
-			Errors errors, Model model) {
+	public String processDesign(@Valid Taco design, Errors errors,
+			@ModelAttribute Order order) {
 		if (errors.hasErrors()) {
 			return "design";
 		}
-
-		// Save the taco design...
-		// We'll do this in chapter 3
-		// log.info("Processing design: " + design);
-
+		Taco saved = designRepo.save(design);
+		order.addDesign(saved);
 		return "redirect:/orders/current";
 	}
 
