@@ -25,8 +25,8 @@ import tacos.Taco;
 @RequestMapping("/design")
 public class DesignTacoController {
 
-	@GetMapping
-	public String showDesignForm(Model model) {
+	@ModelAttribute
+	public void addIngredientsToModel(Model model) {
 		List<Ingredient> ingredients = Arrays.asList(
 				new Ingredient("FLTO", "Flour Tortilla", Type.WRAP),
 				new Ingredient("COTO", "Corn Tortilla", Type.WRAP),
@@ -38,17 +38,27 @@ public class DesignTacoController {
 				new Ingredient("JACK", "Monterrey Jack", Type.CHEESE),
 				new Ingredient("SLSA", "Salsa", Type.SAUCE),
 				new Ingredient("SRCR", "Sour Cream", Type.SAUCE));
+
 		Type[] types = Ingredient.Type.values();
 		for (Type type : types) {
 			model.addAttribute(type.toString().toLowerCase(),
 					filterByType(ingredients, type));
 		}
+	}
+
+	@GetMapping
+	public String showDesignForm(Model model) {
 		model.addAttribute("design", new Taco());
 		return "design";
 	}
 
 	@PostMapping
-	public String processDesign(Taco design) {
+	public String processDesign(@Valid @ModelAttribute("design") Taco design,
+			Errors errors, Model model) {
+		if (errors.hasErrors()) {
+			return "design";
+		}
+
 		// Save the taco design...
 		// We'll do this in chapter 3
 		log.info("Processing design: " + design);
